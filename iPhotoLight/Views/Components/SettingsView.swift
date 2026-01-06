@@ -9,11 +9,13 @@ struct SettingsView: View {
     @State private var textInput: String = ""
     
     @Environment(\.dismiss) var dismiss
+    // 引入语言管理器，确保文字刷新
+    @EnvironmentObject var languageManager: LocalizationManager
     
     let presets = [10, 20, 30, 40, 50, 100]
     
-    // [新增] 只有这里为了显示文字用了下 unitName，也可以写死 "Items"
-    var unitName: String = "Items"
+    // 这里也可以用 computed property 来做国际化
+    var unitName: String { "Items".localized }
     
     var body: some View {
         NavigationView {
@@ -21,10 +23,10 @@ struct SettingsView: View {
                 // --- 原有功能：手动输入 ---
                 Section {
                     HStack {
-                        Text("Custom Amount")
+                        Text("Custom Amount".localized)
                             .foregroundColor(.primary)
                         Spacer()
-                        TextField("Enter number", text: $textInput)
+                        TextField("Enter number".localized, text: $textInput)
                             .keyboardType(.numberPad)
                             .multilineTextAlignment(.trailing)
                             .frame(width: 120)
@@ -36,16 +38,16 @@ struct SettingsView: View {
                             .foregroundColor(.blue)
                     }
                 } header: {
-                    Text("Manual Input")
+                    Text("Manual Input".localized)
                 } footer: {
-                    Text("Enter 0 or select 'Unlimited' to load all items.")
+                    Text("Enter 0 or select 'Unlimited' to load all items.".localized)
                 }
                 
                 // --- 原有功能：快捷选项 ---
                 Section {
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 10) {
-                            PresetButton(title: "Unlimited", isSelected: batchSize == 0) {
+                            PresetButton(title: "Unlimited".localized, isSelected: batchSize == 0) {
                                 batchSize = 0
                                 textInput = ""
                             }
@@ -61,16 +63,16 @@ struct SettingsView: View {
                     }
                     .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 0))
                 } header: {
-                    Text("Quick Select")
+                    Text("Quick Select".localized)
                 }
                 
                 // --- 原有功能：当前状态 ---
                 Section {
                     HStack {
-                        Text("Current Limit")
+                        Text("Current Limit".localized)
                         Spacer()
                         if batchSize == 0 {
-                            Text("Unlimited")
+                            Text("Unlimited".localized)
                                 .bold()
                                 .foregroundColor(.green)
                         } else {
@@ -82,28 +84,27 @@ struct SettingsView: View {
                 }
                 
                 // --- 【新增功能】数据管理 (Data Management) ---
-                // 保持原生风格，添加一个红色按钮 Section
                 Section {
                     Button(role: .destructive) {
                         showResetStatsAlert = true
                     } label: {
                         HStack {
-                            Text("Reset All Statistics")
+                            Text("Reset All Statistics".localized)
                             Spacer()
                             Image(systemName: "trash")
                         }
                     }
                 } header: {
-                    Text("Data Management")
+                    Text("Data Management".localized)
                 } footer: {
-                    Text("This will clear 'Cleaned Space' counter and 'Deleted' count.")
+                    Text("This will clear 'Cleaned Space' counter and 'Deleted' count.".localized)
                 }
             }
-            .navigationTitle("Settings")
+            .navigationTitle("Settings".localized)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Done") {
+                    Button("Done".localized) {
                         if let val = Int(textInput), val > 0 { batchSize = val }
                         dismiss()
                     }
@@ -116,12 +117,12 @@ struct SettingsView: View {
             // 确认弹窗
             .alert(isPresented: $showResetStatsAlert) {
                 Alert(
-                    title: Text("Reset All Stats?"),
-                    message: Text("This will clear your 'Cleaned Space' achievement and deleted counts. This cannot be undone."),
-                    primaryButton: .destructive(Text("Reset All"), action: {
+                    title: Text("Reset All Stats?".localized),
+                    message: Text("This will clear your 'Cleaned Space' achievement and deleted counts. This cannot be undone.".localized),
+                    primaryButton: .destructive(Text("Reset All".localized), action: {
                         performFullReset()
                     }),
-                    secondaryButton: .cancel()
+                    secondaryButton: .cancel(Text("Cancel".localized))
                 )
             }
         }
@@ -132,13 +133,11 @@ struct SettingsView: View {
         ReviewHistoryManager.shared.clearHistory()
         TrashManager.shared.resetStatistics()
         
-        // 简单的触感反馈
         let generator = UINotificationFeedbackGenerator()
         generator.notificationOccurred(.success)
     }
 }
 
-// 辅助组件保持不变
 struct PresetButton: View {
     let title: String
     let isSelected: Bool

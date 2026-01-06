@@ -2,25 +2,17 @@
 //  MainTabView.swift
 //  iPhotoLight
 //
-//  Path: Views/MainTabView.swift
-//
 
 import SwiftUI
 
 struct MainTabView: View {
-    // 控制 Tab 选中状态
     @State private var selection = 0
+    // 1. 监听语言变化
+    @EnvironmentObject var languageManager: LocalizationManager
     
     init() {
-        // 【关键】配置 UIKit 的 TabBar 外观为透明
-        // 这样我们的 LiquidBackground 才能透过底部的 TabBar 显示出来
         let appearance = UITabBarAppearance()
-        appearance.configureWithTransparentBackground() // 全透明
-        
-        // 可选：设置 Tab 选中时的颜色（例如黑色或特定主题色）
-        // appearance.stackedLayoutAppearance.selected.iconColor = .black
-        // appearance.stackedLayoutAppearance.selected.titleTextAttributes = [.foregroundColor: UIColor.black]
-        
+        appearance.configureWithTransparentBackground()
         UITabBar.appearance().standardAppearance = appearance
         UITabBar.appearance().scrollEdgeAppearance = appearance
     }
@@ -28,31 +20,32 @@ struct MainTabView: View {
     var body: some View {
         TabView(selection: $selection) {
             
-            // Tab 0: 照片整理
+            // Tab 0: Photos
             PhotoListView()
                 .tabItem {
-                    Label("Photos", systemImage: "photo.stack")
+                    // 2. 使用 localized 获取翻译
+                    Label("Photos".localized, systemImage: "photo.stack")
                 }
                 .tag(0)
             
-            // Tab 1: 视频整理 (已替换为真实页面)
+            // Tab 1: Videos
             VideoListView()
                 .tabItem {
-                    Label("Videos", systemImage: "play.rectangle")
+                    Label("Videos".localized, systemImage: "play.rectangle")
                 }
                 .tag(1)
             
-            // 3. Stats Tab (正式接入)
+            // Tab 2: Stats
             StatsView()
                 .tabItem {
                     Image(systemName: "chart.pie")
-                    Text("Stats")
+                    Text("Stats".localized)
                 }
                 .tag(2)
         }
-        // 确保 TabView 不会被遮挡
         .zIndex(1)
-        // 设置 TabBar 的强调色 (这里设为黑色以配合 Bradley Hand 字体风格)
         .accentColor(.black)
+        // 3. 关键：当语言改变时，强制刷新 TabView ID 以确保 tabItem 文字重绘
+        .id(languageManager.currentLanguage)
     }
 }

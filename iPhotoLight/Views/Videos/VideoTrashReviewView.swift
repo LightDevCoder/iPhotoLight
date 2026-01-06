@@ -1,10 +1,3 @@
-//
-//  VideoTrashReviewView.swift
-//  iPhotoLight
-//
-//  Path: Views/Videos/VideoTrashReviewView.swift
-//
-
 import SwiftUI
 internal import Photos
 
@@ -12,14 +5,12 @@ struct VideoTrashReviewView: View {
     @ObservedObject var viewModel: VideoListViewModel
     @Environment(\.presentationMode) var presentationMode
     
-    // 【状态】记录哪些视频是“被选中要删除”的（默认全选）
-    // 逻辑：Selected (红圈) = 确认删除; Unselected (无圈) = 确认保留/恢复
-    @State private var selectedIDs: Set<String> = []
+    // 注入语言环境
+    @EnvironmentObject var languageManager: LocalizationManager
     
-    // 二次确认弹窗
+    @State private var selectedIDs: Set<String> = []
     @State private var showConfirmationAlert = false
     
-    // 布局：自适应网格
     let columns = [
         GridItem(.adaptive(minimum: 100), spacing: 2)
     ]
@@ -40,10 +31,9 @@ struct VideoTrashReviewView: View {
                                         .aspectRatio(1, contentMode: .fill)
                                         .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity)
                                         .clipped()
-                                        // 【视觉反馈】未选中（即保留）时增加遮罩
                                         .opacity(selectedIDs.contains(asset.id) ? 1.0 : 0.5)
                                     
-                                    // B. 视频标识 (Play Icon)
+                                    // B. 视频标识
                                     Image(systemName: "play.fill")
                                         .font(.caption)
                                         .foregroundColor(.white.opacity(0.8))
@@ -53,12 +43,12 @@ struct VideoTrashReviewView: View {
                                         .position(x: 20, y: 20)
                                         .padding(4)
                                     
-                                    // C. 选中状态指示器 (右上角)
+                                    // C. 选中状态指示器
                                     SelectionIndicator(isSelected: selectedIDs.contains(asset.id))
                                         .padding(6)
                                 }
-                                .aspectRatio(1, contentMode: .fit) // 强制正方形
-                                .contentShape(Rectangle()) // 确保点击区域填满整个正方形
+                                .aspectRatio(1, contentMode: .fit)
+                                .contentShape(Rectangle())
                                 .onTapGesture {
                                     toggleSelection(for: asset)
                                 }
@@ -69,54 +59,48 @@ struct VideoTrashReviewView: View {
                 
                 // 2. 底部操作栏
                 VStack(spacing: 12) {
-                    Text(selectedIDs.isEmpty ? "Tap button below to restore all" : "Unselected videos will be restored")
+                    Text(selectedIDs.isEmpty ? "Tap button below to restore all".localized : "Unselected videos will be restored".localized)
                         .font(.caption)
                         .foregroundColor(.secondary)
                     
                     Button(action: {
                         if selectedIDs.isEmpty {
-                            // 如果一个都没选，直接执行“全部恢复”
                             handleFinalAction()
                         } else {
-                            // 如果有选中的，弹出删除确认
                             showConfirmationAlert = true
                         }
                     }) {
-                        // 【修复】按钮逻辑：根据选中数量动态显示文本，且不再禁用
                         Text(buttonTitle)
                             .font(.headline)
                             .foregroundColor(.white)
                             .frame(maxWidth: .infinity)
                             .padding()
-                            // 样式区分：如果有删除项显示红色，全是恢复项显示蓝色或灰色
                             .background(selectedIDs.isEmpty ? Color.blue : Color.red)
                             .cornerRadius(12)
                     }
-                    // 【关键修复】永远不禁用按钮，保证用户可以操作“全部恢复”
                     .disabled(false)
                 }
                 .padding()
                 .background(.thinMaterial)
             }
-            .navigationTitle("Review Delete")
+            .navigationTitle("Review Delete".localized)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Close") { presentationMode.wrappedValue.dismiss() }
+                    Button("Close".localized) { presentationMode.wrappedValue.dismiss() }
                 }
             }
             .onAppear {
-                // 【初始化】默认全选 (全部待删除)
                 let allIDs = viewModel.assetsToDelete.map { $0.id }
                 selectedIDs = Set(allIDs)
             }
-            .alert("Confirm Deletion", isPresented: $showConfirmationAlert) {
-                Button("Delete", role: .destructive) {
+            .alert("Confirm Deletion".localized, isPresented: $showConfirmationAlert) {
+                Button("Delete".localized, role: .destructive) {
                     handleFinalAction()
                 }
-                Button("Cancel", role: .cancel) { }
+                Button("Cancel".localized, role: .cancel) { }
             } message: {
-                Text("Selected videos will be deleted. Unselected ones will be restored to your library.")
+                Text("Selected videos will be deleted. Unselected ones will be restored to your library.".localized)
             }
         }
     }
@@ -125,43 +109,36 @@ struct VideoTrashReviewView: View {
     
     private var buttonTitle: String {
         if selectedIDs.isEmpty {
-            return "Restore All"
+            return "Restore All".localized
         } else {
-            return "Delete \(selectedIDs.count) Videos"
+            // 简单拼接："Delete" (删除) + 数量 + "Videos" (视频)
+            // 中文效果：删除 5 视频 (虽然不如“个”完美，但通用性高且开发成本低)
+            return "\("Delete".localized) \(selectedIDs.count) \("Videos".localized)"
         }
     }
     
     private func toggleSelection(for asset: PhotoAsset) {
         withAnimation(.easeInOut(duration: 0.2)) {
             if selectedIDs.contains(asset.id) {
-                selectedIDs.remove(asset.id) // 移除勾选 = 变为恢复状态
+                selectedIDs.remove(asset.id)
             } else {
-                selectedIDs.insert(asset.id) // 增加勾选 = 变为删除状态
+                selectedIDs.insert(asset.id)
             }
         }
     }
     
-    // 【核心修复】统一处理逻辑：删除选中的，恢复未选中的
     private func handleFinalAction() {
-        // 1. 区分“要删的”和“要留的”
         let assetsToDelete = viewModel.assetsToDelete.filter { selectedIDs.contains($0.id) }
         let assetsToRestore = viewModel.assetsToDelete.filter { !selectedIDs.contains($0.id) }
         
-        // 2. 处理恢复：将未选中的视频移出废纸篓，加回主列表
         for asset in assetsToRestore {
             viewModel.restoreFromTrash(asset)
         }
         
-        // 3. 处理删除：执行物理删除
         if assetsToDelete.isEmpty {
-            // 如果没有要删的（全是恢复），直接关闭即可
             presentationMode.wrappedValue.dismiss()
         } else {
-            // 此时 viewModel.assetsToDelete 应该只剩下要删除的了
-            // 为了安全，我们手动更新一下 VM 的列表为“仅包含要删除的项”
-            // 这样 confirmDeletion 内部逻辑就不会误删刚刚恢复的项
             viewModel.assetsToDelete = assetsToDelete
-            
             viewModel.confirmDeletion { success in
                 if success {
                     presentationMode.wrappedValue.dismiss()
@@ -170,23 +147,19 @@ struct VideoTrashReviewView: View {
         }
     }
     
-    // MARK: - Subviews
-    
     var emptyTrashView: some View {
         VStack(spacing: 15) {
             Image(systemName: "trash.slash")
                 .font(.largeTitle)
                 .foregroundColor(.gray)
-            Text("Trash is Empty")
+            Text("Trash is Empty".localized)
                 .foregroundColor(.secondary)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
 
-// MARK: - Helper Components
-
-// 专用于视频废纸篓的缩略图组件
+// 缩略图组件保持不变 (无需国际化)
 struct VideoTrashThumbnail: View {
     let asset: PhotoAsset
     @State private var image: UIImage?

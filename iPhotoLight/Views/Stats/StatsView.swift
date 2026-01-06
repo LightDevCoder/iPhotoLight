@@ -4,6 +4,9 @@ struct StatsView: View {
     @StateObject private var viewModel = StatsViewModel()
     @State private var showResetAlert = false
     
+    // 1. 获取 LocalizationManager
+    @EnvironmentObject var languageManager: LocalizationManager
+    
     var body: some View {
         ZStack {
             // 背景
@@ -13,9 +16,9 @@ struct StatsView: View {
             VStack(spacing: 0) {
                 // Header
                 HStack {
-                    Text("Storage Manager")
-                        .font(.custom("Bradley Hand", size: 36))
-                        .fontWeight(.bold)
+                    // [修改后] 使用 Storage Manager 获取 "使用统计"，并统一字体
+                    Text("Storage Manager".localized)
+                        .font(.custom("BradleyHandITCTT-Bold", size: 42))
                         .foregroundColor(.primary)
                     Spacer()
                 }
@@ -39,7 +42,7 @@ struct StatsView: View {
                             HStack {
                                 Image(systemName: "trash.circle.fill")
                                     .foregroundColor(.gray)
-                                Text("Total Cleaned")
+                                Text("Total Cleaned".localized) // 国际化
                                     .font(.subheadline)
                                     .fontWeight(.semibold)
                                     .foregroundColor(.secondary)
@@ -59,22 +62,21 @@ struct StatsView: View {
                             
                             // 图例 (带实时百分比)
                             HStack(spacing: 16) {
-                                // 判断是否有真实数据
                                 let hasData = viewModel.totalDeletedCount > 0
                                 
                                 LegendItem(
                                     color: .blue,
-                                    text: "Photos",
+                                    text: "Photos".localized, // 国际化
                                     ratio: hasData ? viewModel.photoPercent : 0
                                 )
                                 LegendItem(
                                     color: .red,
-                                    text: "Screenshots",
+                                    text: "Screenshots".localized, // 国际化
                                     ratio: hasData ? viewModel.screenshotPercent : 0
                                 )
                                 LegendItem(
                                     color: .green,
-                                    text: "Videos",
+                                    text: "Videos".localized, // 国际化
                                     ratio: hasData ? viewModel.videoPercent : 0
                                 )
                             }
@@ -87,33 +89,70 @@ struct StatsView: View {
                         )
                         .padding(.horizontal)
                         
-                        // --- 第三部分：底部重置区 ---
-                        Button(action: { showResetAlert = true }) {
-                            HStack {
-                                VStack(alignment: .leading, spacing: 2) {
-                                    Text("Reset Review History")
-                                        .font(.subheadline)
-                                        .fontWeight(.bold)
-                                        .foregroundColor(.primary)
-                                    
-                                    Text("Reviewed \(viewModel.totalReviewedCount) items, \(viewModel.totalDeletedCount) deleted.")
-                                        .font(.caption2)
+                        // --- 第三部分：设置区域 (重置 + 语言) ---
+                        VStack(spacing: 10) {
+                            // 3.1 重置按钮
+                            Button(action: { showResetAlert = true }) {
+                                HStack {
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text("Reset History".localized) // 国际化
+                                            .font(.subheadline)
+                                            .fontWeight(.bold)
+                                            .foregroundColor(.primary)
+                                        
+                                        // 复杂的动态文本国际化建议只做简单处理，或者在 LocalizationManager 增加带参数方法
+                                        // 这里简单拼接
+                                        let reviewedText = "Viewed".localized + " \(viewModel.totalReviewedCount), "
+                                        let deletedText = "Deleted".localized + " \(viewModel.totalDeletedCount)."
+                                        
+                                        Text(reviewedText + deletedText)
+                                            .font(.caption2)
+                                            .foregroundColor(.secondary)
+                                    }
+                                    Spacer()
+                                    Image(systemName: "arrow.counterclockwise")
                                         .foregroundColor(.secondary)
+                                        .font(.caption)
                                 }
-                                Spacer()
-                                Image(systemName: "chevron.right")
-                                    .foregroundColor(.secondary)
-                                    .font(.caption)
+                                .padding(16)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 16)
+                                        .fill(.ultraThinMaterial)
+                                )
                             }
-                            .padding(16)
-                            .background(
-                                RoundedRectangle(cornerRadius: 16)
-                                    .fill(.ultraThinMaterial)
-                            )
+                            
+                            // 3.2 [NEW] 语言切换按钮
+                            Button(action: {
+                                languageManager.toggleLanguage()
+                            }) {
+                                HStack {
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text("Switch Language".localized)
+                                            .font(.subheadline)
+                                            .fontWeight(.bold)
+                                            .foregroundColor(.primary)
+                                        
+                                        Text(languageManager.currentLanguage.displayName)
+                                            .font(.caption2)
+                                            .foregroundColor(.secondary)
+                                    }
+                                    Spacer()
+                                    
+                                    // 简单的语言图标
+                                    Image(systemName: "globe")
+                                        .foregroundColor(.secondary)
+                                        .font(.body)
+                                }
+                                .padding(16)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 16)
+                                        .fill(.ultraThinMaterial)
+                                )
+                            }
                         }
                         .padding(.horizontal)
                         
-                        // 底部垫高，防止被 TabBar 遮挡
+                        // 底部垫高
                         Spacer().frame(height: 100)
                     }
                     .padding(.top, 10)
@@ -123,44 +162,47 @@ struct StatsView: View {
         .onAppear {
             viewModel.loadStats()
         }
+        // 4. 监听语言变化，重新加载 VM 以刷新卡片标题 (因为卡片标题存储在 VM struct 中)
+        .onChange(of: languageManager.currentLanguage) { _ in
+            viewModel.loadStats()
+        }
         .alert(isPresented: $showResetAlert) {
             Alert(
-                title: Text("Reset History?"),
-                message: Text("This will make all previously reviewed photos appear again."),
-                primaryButton: .destructive(Text("Reset"), action: { viewModel.resetHistory() }),
-                secondaryButton: .cancel()
+                title: Text("Reset Confirm".localized),
+                message: Text("This will make all previously reviewed photos appear again.".localized),
+                primaryButton: .destructive(Text("Reset".localized), action: { viewModel.resetHistory() }),
+                secondaryButton: .cancel(Text("Cancel".localized))
             )
         }
     }
 }
 
 // MARK: - Subviews
+// 注意：Subviews 中的 Label 也要国际化
 
-// 1. 单行数据卡片
 struct StatRowCard: View {
     let data: CategoryStatData
     
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            // 标题行
             HStack {
                 Image(systemName: data.icon)
                     .foregroundColor(data.color)
                     .font(.body)
-                Text(data.typeName)
+                Text(data.typeName) // 这里已经由 VM 传入了国际化后的字符串
                     .font(.subheadline)
                     .fontWeight(.bold)
                     .foregroundColor(.primary)
                 Spacer()
             }
             
-            // 数据行
             HStack {
-                DataColumn(icon: "eye.fill", value: "\(data.viewedCount)", label: "Viewed", color: .blue)
+                // Label 国际化
+                DataColumn(icon: "eye.fill", value: "\(data.viewedCount)", label: "Viewed".localized, color: .blue)
                 Spacer()
-                DataColumn(icon: "trash.fill", value: "\(data.deletedCount)", label: "Deleted", color: .red)
+                DataColumn(icon: "trash.fill", value: "\(data.deletedCount)", label: "Deleted".localized, color: .red)
                 Spacer()
-                DataColumn(icon: "paintbrush.fill", value: data.savedSpace, label: "Cleaned", color: .green)
+                DataColumn(icon: "paintbrush.fill", value: data.savedSpace, label: "Cleaned".localized, color: .green)
             }
         }
         .padding(14)
@@ -172,7 +214,8 @@ struct StatRowCard: View {
     }
 }
 
-// 2. 数据列组件
+// DataColumn, StorageBarChart 保持不变
+// LegendItem 不需要改动，因为 StatsView 传参时已经加了 .localized
 struct DataColumn: View {
     let icon: String
     let value: String
@@ -197,7 +240,6 @@ struct DataColumn: View {
     }
 }
 
-// 3. 条形图组件
 struct StorageBarChart: View {
     let blueRatio: Double
     let redRatio: Double
@@ -208,22 +250,18 @@ struct StorageBarChart: View {
             let totalWidth = geometry.size.width
             
             HStack(spacing: 0) {
-                // Photos
                 Rectangle()
                     .fill(Color.blue.opacity(0.9))
                     .frame(width: totalWidth * CGFloat(blueRatio))
                 
-                // Screenshots
                 Rectangle()
                     .fill(Color.red.opacity(0.9))
                     .frame(width: totalWidth * CGFloat(redRatio))
                 
-                // Videos
                 Rectangle()
                     .fill(Color.green.opacity(0.9))
                     .frame(width: totalWidth * CGFloat(greenRatio))
                 
-                // 剩余
                 Rectangle()
                     .fill(Color.gray.opacity(0.1))
             }
@@ -232,7 +270,6 @@ struct StorageBarChart: View {
     }
 }
 
-// 4. 图例组件 (带百分比)
 struct LegendItem: View {
     let color: Color
     let text: String

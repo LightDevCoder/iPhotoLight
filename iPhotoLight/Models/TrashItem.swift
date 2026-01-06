@@ -12,9 +12,9 @@ struct TrashItem: Codable, Hashable, Identifiable {
     let size: Int64
     let deleteDate: Date
     
-    // 修复：优化显示逻辑，0 直接显示 "0"
+    // 修复：优化显示逻辑，0 直接显示 "0 KB"
     var formattedSize: String {
-        if size == 0 { return "0" } // 直接返回简洁的 0
+        if size == 0 { return "0 KB" } // 直接返回简洁的 0
         
         let formatter = ByteCountFormatter()
         formatter.allowedUnits = [.useMB, .useGB, .useKB]

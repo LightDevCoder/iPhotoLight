@@ -86,7 +86,8 @@ struct PhotoListView: View {
         VStack(spacing: 0) {
             // 标题区域
             VStack(spacing: 4) {
-                Text("Photos")
+                // [修改后] 添加 .localized
+                Text("Photos".localized)
                     .font(.custom("BradleyHandITCTT-Bold", size: 42))
                     .foregroundColor(.primary)
                     .frame(maxWidth: .infinity)

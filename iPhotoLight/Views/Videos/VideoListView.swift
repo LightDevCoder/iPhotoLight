@@ -62,10 +62,10 @@ struct VideoListView: View {
     private var headerContent: some View {
         VStack(spacing: 4) {
             // 1. 标题
-            // [修改后]
-            Text("Videos")
+            // [修改后] 添加 .localized
+            Text("Videos".localized)
                 .font(.custom("BradleyHandITCTT-Bold", size: 42))
-                .foregroundColor(.primary) // 【关键修改】自动适应黑/白
+                .foregroundColor(.primary)
                 .frame(maxWidth: .infinity)
             
             // 2. 控制栏：设置 - (Add Videos) - 垃圾桶

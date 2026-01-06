@@ -1,10 +1,3 @@
-//
-//  Item.swift
-//  iPhotoLight
-//
-//  Created by Light Chan on 04/01/2026.
-//
-
 import Foundation
 import SwiftData
 

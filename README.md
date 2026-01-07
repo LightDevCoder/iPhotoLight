@@ -92,7 +92,7 @@ UI 框架: SwiftUI (主要), UIKit (用于 ZoomableScrollView, PHLivePhotoView)
 数据存储: UserDefaults (用于历史记录), Photo Library (系统相册)
 
 ## 🚀 快速开始 (Getting Started)
-环境要求: Xcode 14.0+, iOS 16.0+
+环境要求: Xcode 14.0+, iOS 17.0+
 
 克隆项目: git clone https://github.com/your-username/iPhotoLight.git
 

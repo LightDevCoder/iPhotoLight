@@ -71,6 +71,9 @@ class LocalizationManager: ObservableObject {
         "This will clear your 'Cleaned Space' achievement and deleted counts. This cannot be undone.": [.english: "This will clear your 'Cleaned Space' achievement and deleted counts. This cannot be undone.", .chinese: "这将清除您的“已清理空间”成就和已删除计数。此操作无法撤销。"],
         "Reset All": [.english: "Reset All", .chinese: "全部重置"],
         "Done": [.english: "Done", .chinese: "完成"],
+        "Access Required": [.english: "Access Required", .chinese: "需要访问权限"],
+        "iPhotoLight needs access to your photo library to help you organize and clean up.": [.english: "iPhotoLight needs access to your photo library to help you organize and clean up.", .chinese: "iPhotoLight 需要访问您的相册以帮助您整理和清理照片。"],
+        "Open Settings": [.english: "Open Settings", .chinese: "打开设置"],
         
         // --- Trash / Review Pages 删除确认页 ---
         "Review Delete": [.english: "Review Delete", .chinese: "确认删除"],

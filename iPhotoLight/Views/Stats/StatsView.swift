@@ -95,7 +95,7 @@ struct StatsView: View {
                             Button(action: { showResetAlert = true }) {
                                 HStack {
                                     VStack(alignment: .leading, spacing: 2) {
-                                        Text("Reset History".localized) // 国际化
+                                        Text("Reset Review History".localized) // 国际化
                                             .font(.subheadline)
                                             .fontWeight(.bold)
                                             .foregroundColor(.primary)

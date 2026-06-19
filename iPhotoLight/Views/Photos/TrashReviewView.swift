@@ -148,7 +148,6 @@ struct TrashReviewView: View {
     }
 }
 
-// 缩略图组件保持不变
 struct TrashThumbnail: View {
     let asset: PhotoAsset
     @State private var image: UIImage?

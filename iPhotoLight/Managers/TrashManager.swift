@@ -61,7 +61,6 @@ class TrashManager {
     
     // 在 TrashManager 类中添加
 
-    /// [新增] 重置所有统计数据 (归零 "Cleaned Space" 和 "Deleted Count")
     func resetStatistics() {
         items.removeAll()
         saveToDisk()

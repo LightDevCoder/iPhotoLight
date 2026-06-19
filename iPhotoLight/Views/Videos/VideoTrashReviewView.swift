@@ -159,7 +159,6 @@ struct VideoTrashReviewView: View {
     }
 }
 
-// 缩略图组件保持不变 (无需国际化)
 struct VideoTrashThumbnail: View {
     let asset: PhotoAsset
     @State private var image: UIImage?

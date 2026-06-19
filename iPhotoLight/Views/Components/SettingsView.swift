@@ -4,7 +4,6 @@ struct SettingsView: View {
     // [逻辑优化] 内部直接读取设置，调用时无需传参
     @AppStorage("organizeBatchSize") var batchSize: Int = 50
     
-    // [新增] 弹窗状态
     @State private var showResetStatsAlert = false
     @State private var textInput: String = ""
     
@@ -83,7 +82,6 @@ struct SettingsView: View {
                     }
                 }
                 
-                // --- 【新增功能】数据管理 (Data Management) ---
                 Section {
                     Button(role: .destructive) {
                         showResetStatsAlert = true

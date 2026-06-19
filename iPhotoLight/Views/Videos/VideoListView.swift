@@ -53,7 +53,7 @@ struct VideoListView: View {
                 .zIndex(100)
             }
         }
-        .onAppear { viewModel.checkPermissionAndLoad() }
+        .task { await viewModel.checkPermissionAndLoad() }
         .sheet(isPresented: $showTrash) { VideoTrashReviewView(viewModel: viewModel) }
         .sheet(isPresented: $showSettings, onDismiss: { viewModel.loadVideos() }) { SettingsView() }
     }
@@ -62,7 +62,6 @@ struct VideoListView: View {
     private var headerContent: some View {
         VStack(spacing: 4) {
             // 1. 标题
-            // [修改后] 添加 .localized
             Text("Videos".localized)
                 .font(.custom("BradleyHandITCTT-Bold", size: 42))
                 .foregroundColor(.primary)
@@ -133,7 +132,7 @@ struct VideoListView: View {
             // 图标：颜色改为 primary
             Image(systemName: iconName)
                 .font(.system(size: 18, weight: .medium))
-                .foregroundColor(.primary) // 【关键修改】浅色模式黑，深色模式白
+                .foregroundColor(.primary)
                 .opacity(0.8) // 稍微加一点透明度更有质感，也可以去掉
         }
         .frame(width: 44, height: 44)

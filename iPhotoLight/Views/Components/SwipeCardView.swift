@@ -123,8 +123,6 @@ struct SwipeCardView: View {
         .animation(.easeInOut(duration: 0.2), value: offset)
     }
     
-    // ... 逻辑代码保持不变 ...
-    
     private func loadAssetImage(size: CGSize) {
         let scale = UIScreen.main.scale
         let targetSize = CGSize(width: size.width * scale, height: size.height * scale)

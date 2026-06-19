@@ -7,7 +7,7 @@ internal import Photos
 struct LoopingPlayerView: UIViewControllerRepresentable {
     let asset: PHAsset
     var shouldPlay: Bool
-    @Binding var isMuted: Bool // [新增] 绑定静音状态
+    @Binding var isMuted: Bool
     
     func makeUIViewController(context: Context) -> AVPlayerViewController {
         let controller = AVPlayerViewController()
@@ -33,7 +33,6 @@ struct LoopingPlayerView: UIViewControllerRepresentable {
             player.pause()
         }
         
-        // 2. [新增] 处理静音状态
         if player.isMuted != isMuted {
             player.isMuted = isMuted
         }

@@ -16,7 +16,6 @@ struct StatsView: View {
             VStack(spacing: 0) {
                 // Header
                 HStack {
-                    // [修改后] 使用 Storage Manager 获取 "使用统计"，并统一字体
                     Text("Storage Manager".localized)
                         .font(.custom("BradleyHandITCTT-Bold", size: 42))
                         .foregroundColor(.primary)
@@ -214,8 +213,6 @@ struct StatRowCard: View {
     }
 }
 
-// DataColumn, StorageBarChart 保持不变
-// LegendItem 不需要改动，因为 StatsView 传参时已经加了 .localized
 struct DataColumn: View {
     let icon: String
     let value: String

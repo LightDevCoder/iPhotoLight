@@ -7,10 +7,8 @@ struct SwipeVideoView: View {
     let asset: PhotoAsset
     let isTopCard: Bool
     
-    // [新增] 交互回调
     var onTapForDetail: () -> Void
     
-    // [新增] 内部管理静音状态，默认静音
     @State private var isMuted: Bool = true
     
     var body: some View {
@@ -20,7 +18,6 @@ struct SwipeVideoView: View {
                 LoopingPlayerView(asset: asset.asset, shouldPlay: isTopCard, isMuted: $isMuted)
                     .frame(width: geometry.size.width, height: geometry.size.height)
                     .clipped()
-                    // [新增] 点击卡片区域触发全屏预览
                     .contentShape(Rectangle())
                     .onTapGesture {
                         onTapForDetail()

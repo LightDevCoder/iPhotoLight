@@ -59,7 +59,6 @@ class StatsViewModel: ObservableObject {
                 self.totalDeletedCount = deletedPhotosCount + deletedScreenshotsCount + deletedVideosCount
                 self.totalSavedSpace = self.formatBytes(trash.totalSize)
                 
-                // 【修改点】这里使用 .localized 确保卡片标题随语言变化
                 self.photoStats = CategoryStatData(
                     typeName: "Photos".localized,
                     icon: "photo",

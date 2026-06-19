@@ -8,7 +8,6 @@ struct PhotoListView: View {
     // 控制设置页面的显示
     @State private var showSettingsSheet = false
     
-    // 【新增】控制详情预览
     @State private var selectedPhotoForDetail: PhotoAsset? = nil
     
     // 配置导航栏外观
@@ -50,7 +49,6 @@ struct PhotoListView: View {
                     .blur(radius: selectedPhotoForDetail != nil ? 20 : 0)
                 }
                 
-                // 3. 【新增】全屏预览层
                 if let photo = selectedPhotoForDetail {
                     PhotoDetailOverlay(asset: photo) {
                         withAnimation {
@@ -72,8 +70,6 @@ struct PhotoListView: View {
             }
         }
         .onAppear {
-            // 【修复问题2】每次页面显示（包括从设置页回来，或者从后台回来）都尝试加载
-            // 只有当权限已获取时才加载，避免未授权时无效调用
             if viewModel.permissionStatus == .authorized || viewModel.permissionStatus == .limited {
                 viewModel.loadAssets()
             }
@@ -86,7 +82,6 @@ struct PhotoListView: View {
         VStack(spacing: 0) {
             // 标题区域
             VStack(spacing: 4) {
-                // [修改后] 添加 .localized
                 Text("Photos".localized)
                     .font(.custom("BradleyHandITCTT-Bold", size: 42))
                     .foregroundColor(.primary)
@@ -165,7 +160,6 @@ struct PhotoListView: View {
                         .opacity(index == 0 ? 1.0 : 0.7)
                         .allowsHitTesting(index == 0)
                         .position(x: geo.size.width / 2, y: geo.size.height / 2)
-                        // 【新增】点击卡片进入详情预览
                         .onTapGesture {
                             if index == 0 { // 只有最上面的卡片能点
                                 withAnimation {

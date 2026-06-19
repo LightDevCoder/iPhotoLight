@@ -7,11 +7,10 @@ enum PhotoCategory: String, CaseIterable, Identifiable {
     case favorites = "Favorites"
     case screenshots = "Screenshots"
     case selfies = "Selfies"
-    case live = "Live" // 【新增】实况
+    case live = "Live"
     
     var id: String { rawValue }
     
-    // 【核心修复】添加 predicate 属性，解决编译报错
     var predicate: NSPredicate? {
         switch self {
         case .all:
@@ -27,7 +26,6 @@ enum PhotoCategory: String, CaseIterable, Identifiable {
             return NSPredicate(format: "(mediaSubtypes & %d) != 0", PHAssetMediaSubtype.photoScreenshot.rawValue)
             
         case .live:
-            // 【新增】筛选实况照片
             return NSPredicate(format: "(mediaSubtypes & %d) != 0", PHAssetMediaSubtype.photoLive.rawValue)
             
         case .selfies:
@@ -46,7 +44,7 @@ enum PhotoCategory: String, CaseIterable, Identifiable {
         case .favorites: return "heart.fill"
         case .screenshots: return "camera.viewfinder"
         case .selfies: return "person.crop.square"
-        case .live: return "livephoto" // 【新增】实况图标
+        case .live: return "livephoto"
         }
     }
 }
